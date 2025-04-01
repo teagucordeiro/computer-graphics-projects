@@ -2,6 +2,7 @@
 #include <fstream>
 #include <memory>
 #include <cstdint>
+#include "include/background.h"
 
 using byte = std::uint8_t;
 
@@ -28,6 +29,17 @@ int main()
   constexpr size_t height{200};
   constexpr size_t channels{3};
   constexpr size_t total_bytes{width * height * channels};
+  constexpr BackgroundColor::Color24 RED{255, 0, 0};
+  constexpr BackgroundColor::Color24 GREEN{0, 255, 0};
+  constexpr BackgroundColor::Color24 BLUE{0, 0, 255};
+  constexpr BackgroundColor::Color24 YELLOW{255, 255, 0};
+
+  std::vector<BackgroundColor::Color24> colors{RED,
+                                                 GREEN,
+                                                 BLUE,
+                                                 YELLOW};
+
+  BackgroundColor background{colors};
 
   constexpr byte max_value{255};
   constexpr float blue_percentage{0.2};
@@ -37,16 +49,15 @@ int main()
 
   for (size_t row{0}; row < height; ++row)
   {
-    float green_ratio = 1.0f - static_cast<float>(row) / (height - 1);
-    byte green_channel_value = static_cast<byte>(green_ratio * max_value);
+    float v {((float)row / (float)(height - 1))};
     for (size_t column{0}; column < width; ++column)
     {
-      float red_ratio = static_cast<float>(column) / (width);
-      byte red_channel_value = static_cast<byte>(red_ratio * max_value);
+      float u {((float)column / (float)(width - 1))};
+      auto color = background.sampleUV(u,v);
       size_t idx = (row * width + column) * channels;
-      image[idx + 0] = red_channel_value;
-      image[idx + 1] = green_channel_value;
-      image[idx + 2] = blue_channel_value;
+      image[idx + 0] = color.red;
+      image[idx + 1] = color.green;
+      image[idx + 2] = color.blue;
     }
   }
 
